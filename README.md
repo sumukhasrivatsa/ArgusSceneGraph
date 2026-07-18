@@ -12,7 +12,7 @@ This is the first part of a series documenting ARGUS. Before the LLM reasons abo
 
 Given a live RGBD stream, ARGUS:
 
-1. Runs **YOLO** on the current frame — detects every object in the scene, not just the ones in the user's prompt
+1. Runs **VLM** on the current frame — detects every object in the scene, not just the ones in the user's prompt
 2. Projects each detection into **3D world coordinates** using depth + TF
 3. Constructs a **scene graph** — every object becomes a node, every pair of objects gets a set of spatial relations as edges
 4. Renders a **live HTML visualizer** that opens in the browser the moment it runs
@@ -25,7 +25,7 @@ The scene graph is what gets handed to the LLM in Part 2. The richer the graph, 
 
 Each object node stores:
 - 3D world position `(x, y, z)`
-- YOLO detection confidence
+- VLM detection confidence
 - Fragility score (from a semantic knowledge base)
 - Reachability (within UR5e workspace limits)
 - Distance to robot base
