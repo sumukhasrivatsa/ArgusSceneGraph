@@ -2,9 +2,14 @@
 
 > Real-Time Open-Vocabulary Affordance Grounding for Reactive Manipulation
 
-<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/303849b4-d3a3-44ed-bf84-eba548496271" />
-<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/e7fd1bc6-b1fc-4f12-8ff1-4fd474033fb5" />
-<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/25b4497e-88a4-4d21-a320-8a166364146a" />
+- Scene Graph with entity quantitative and qualitative relationships
+<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/e7fd1bc6-b1fc-4f12-8ff1-4fd474033fb5" />
+
+-Auto generated comprehensive relationships between entities
+<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/25b4497e-88a4-4d21-a320-8a166364146a" />
+
+- Top Down view of the scene automatically generated
+<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/303849b4-d3a3-44ed-bf84-eba548496271" />
 
 ---
 
@@ -124,8 +129,7 @@ You are the affordance reasoning module for a reactive robot manipulation system
 - Scene from RVIZ after collision objects + Voxels based on affordances
 <img width="726" height="497" alt="3BD23288-AF21-44A0-92E7-3AE681ED2388" src="https://github.com/user-attachments/assets/b0c3466c-bd06-4c76-aeb2-b8c513d96502" />
 
-<img width="740" height="550" alt="3F314B47-042A-43D4-A7E0-19E9AAA73E5F_1_102_o" src="https://github.com/user-attachments/assets/f095812e-3565-48ba-8ee5-7ff65a78d3e0" />
-
+<img width="824" height="627" alt="E5427382-705D-4B51-A02C-30C1EE68B492" src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37" />
 
 ## Stack
 
