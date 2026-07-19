@@ -3,14 +3,13 @@
 > Real-Time Open-Vocabulary Affordance Grounding for Reactive Manipulation
 
 - Scene Graph with entity quantitative and qualitative relationships
-<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/e7fd1bc6-b1fc-4f12-8ff1-4fd474033fb5" />
+<img width="1250" height="629" alt="0D779110-37EC-4E36-8D21-60DDBC7E1F0B_1_105_c" src="https://github.com/user-attachments/assets/cdd3ee91-8c05-4625-b26f-809415929f89" />
 
 -Auto generated comprehensive relationships between entities
-<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/25b4497e-88a4-4d21-a320-8a166364146a" />
+<img width="1458" height="1494" alt="BF7C202F-BFEA-410D-863D-D7BAD490B86B" src="https://github.com/user-attachments/assets/db2dd598-bce8-4f2a-a40c-210f85bade22" />
 
 - Top Down view of the scene automatically generated
-<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/303849b4-d3a3-44ed-bf84-eba548496271" />
-
+<img width="1230" height="638" alt="6B517934-8427-4419-8604-64128E7B6C58_1_105_c" src="https://github.com/user-attachments/assets/3045c3fc-0b9a-410f-9561-850731ac247e" />
 ---
 
 This is the first part of a series documenting ARGUS. Before the LLM reasons about what to do, it needs to know what's actually there — and where. That's what the scene graph does.
@@ -127,9 +126,12 @@ You are the affordance reasoning module for a reactive robot manipulation system
 <img width="726" height="649" alt="6267F819-FFDF-4410-A442-822B7AC550C6" src="https://github.com/user-attachments/assets/6574280a-e5c5-45eb-a513-44bada37602e" />
 
 - Scene from RVIZ after collision objects + Voxels based on affordances
+<img width="740" height="550" alt="3F314B47-042A-43D4-A7E0-19E9AAA73E5F_1_102_o" src="https://github.com/user-attachments/assets/9ab0c583-9196-49cf-8e52-b56c3378d25a" />
+
 <img width="726" height="497" alt="3BD23288-AF21-44A0-92E7-3AE681ED2388" src="https://github.com/user-attachments/assets/b0c3466c-bd06-4c76-aeb2-b8c513d96502" />
 
-<img width="824" height="627" alt="E5427382-705D-4B51-A02C-30C1EE68B492" src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37" />
+<img width="726" height="497" alt="E5427382-705D-4B51-A02C-30C1EE68B492" src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37" />
+
 
 ## Stack
 
