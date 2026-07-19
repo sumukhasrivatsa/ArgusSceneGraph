@@ -102,54 +102,10 @@ Goal:       sports ball at (1.00, 0.21, 0.07)m
   cake                 pos=(+0.76,-0.41,+0.15)m  dist=1.33m  conf=0.94  fragility=0.9  [fragile/food]  ✗ unreachable
   sports ball          pos=(+1.00,+0.21,+0.07)m  dist=1.52m  conf=0.82  fragility=0.1  [ball]  ✗ unreachable
 
-── SPATIAL RELATIONS ──
-  cup                  → cake                  [far_from, left_of, behind, same_level, closer_to_robot_than, clear_of_path]  dist=0.46m
-  cup                  → bowl                  [moderate_distance, right_of, same_level, further_from_robot_than, less_reachable_than, clear_of_path]  dist=0.27m
-  cup                  → sports ball           [far_from, left_of, in_front_of, same_level, closer_to_robot_than]  dist=0.74m
-  cup                  → bottle                [close, left_of, in_front_of, same_level, closer_to_robot_than, target_on_path_to_goal, may_occlude]  dist=0.22m
-  cake                 → bowl                  [far_from, right_of, in_front_of, same_level, further_from_robot_than, less_reachable_than, clear_of_path]  dist=0.68m
-  cake                 → sports ball           [far_from, left_of, in_front_of, same_level, closer_to_robot_than, may_occlude]  dist=0.66m
-  cake                 → bottle                [far_from, right_of, in_front_of, same_level, further_from_robot_than, target_on_path_to_goal, may_occlude]  dist=0.49m
-  bowl                 → sports ball           [far_from, left_of, in_front_of, same_level, closer_to_robot_than, more_reachable_than]  dist=1.01m
-  bowl                 → bottle                [far_from, left_of, in_front_of, same_level, closer_to_robot_than, more_reachable_than, target_on_path_to_goal]  dist=0.47m
-  sports ball          → bottle                [far_from, right_of, behind, same_level, further_from_robot_than]  dist=0.54m
+ - first N lines
+ - Refer to the file /JSONpromptToLLM/ to see the complete prompt
 
-── FRAGILE OBJECTS (handle with care) ──
-  cup: fragility=0.6
-  cake: fragility=0.9
-  bowl: fragility=0.5
-  bottle: fragility=0.8
-
-══════════════════════════════
-User instruction: "move the cup to the ball"
-
-── EXPLICITLY ASSIGNED WEIGHTS (do not change these) ──
-  sports ball         : +200  [GOAL (move toward)]
-
-── OBJECTS NOT MENTIONED BY USER (you must assign these) ──
-  Use the scene graph to reason about each one.
-  cup                   suggested=-100  (reason: out of reach | nearest: bottle(0.24m), bowl(0.28m))
-  cake                  suggested=-100  (reason: fragile (0.9) | out of reach | nearest: cup(0.47m), bottle(0.49m))
-  bowl                  suggested=-500  (reason: nearest: cup(0.28m), bottle(0.47m))
-  bottle                suggested=-100  (reason: fragile (0.8) | out of reach | nearest: cup(0.24m), bowl(0.47m))
-
-── OUTPUT FORMAT ──
-Return ONLY a valid JSON object with a weight for EVERY object.
-Weight scale:
-  +1000 = highest priority goal (move here)
-   +200 = secondary goal
-   -100 = low priority obstacle (can be relaxed)
-   -500 = moderate obstacle (avoid if possible)
-  -1000 = hard obstacle (never touch)
-
-Example output:
-{
-  "cup": -100,
-  "cake": -100,
-  "bowl": -500,
-  "sports ball": 200,
-  "bottle": -100
-}%
+---
 
 ## Stack
 
