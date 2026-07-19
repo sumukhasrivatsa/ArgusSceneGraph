@@ -2,6 +2,10 @@
 
 > Real-Time Open-Vocabulary Affordance Grounding for Reactive Manipulation
 
+<img width="1144" height="608" alt="image" src="https://github.com/user-attachments/assets/303849b4-d3a3-44ed-bf84-eba548496271" />
+<img width="1212" height="700" alt="image" src="https://github.com/user-attachments/assets/e7fd1bc6-b1fc-4f12-8ff1-4fd474033fb5" />
+<img width="1452" height="1058" alt="image" src="https://github.com/user-attachments/assets/25b4497e-88a4-4d21-a320-8a166364146a" />
+
 ---
 
 This is the first part of a series documenting ARGUS. Before the LLM reasons about what to do, it needs to know what's actually there — and where. That's what the scene graph does.
@@ -58,7 +62,8 @@ The HTML visualizer opens automatically after each run.
 │  (knowledge graph    │  (colour-coded       │
 │   style)             │   by relation type)  │
 └──────────────────────┴──────────────────────┘
-```
+```![Uploading image.png…]()
+
 
 - **Top-down map** — objects plotted at real (x, y) positions, robot reach circle, path-to-goal arrow, goal highlighted
 - **Scene graph** — red nodes = objects, blue attribute nodes = conf / fragility / reachability / weight, arrows = spatial relations coloured by family
