@@ -91,21 +91,41 @@ You are the affordance reasoning module for a reactive robot manipulation system
 ║     3D SCENE GRAPH           ║
 ╚══════════════════════════════╝
 
-Robot base: (-0.50, 0.00, 0.00)m  |  Max reach: 0.85m
-Camera:     (0.50, -1.40, 0.82)m
-Goal:       sports ball at (1.00, 0.21, 0.07)m
+-Robot base: (-0.50, 0.00, 0.00)m  |  Max reach: 0.85m
+-Camera:     (0.50, -1.40, 0.82)m
+-Goal:       sports ball at (1.00, 0.21, 0.07)m
 
 ── OBJECTS (5 detected) ──
-  bowl                 pos=(+0.10,-0.24,+0.12)m  dist=0.65m  conf=0.88  fragility=0.5  [container]  ✓ reachable
-  cup                  pos=(+0.36,-0.17,+0.06)m  dist=0.88m  conf=0.95  fragility=0.6  [drinkware/container]  ✗ unreachable
-  bottle               pos=(+0.50,+0.01,+0.15)m  dist=1.01m  conf=0.54  fragility=0.8  [drinkware/fragile]  ✗ unreachable
-  cake                 pos=(+0.76,-0.41,+0.15)m  dist=1.33m  conf=0.94  fragility=0.9  [fragile/food]  ✗ unreachable
-  sports ball          pos=(+1.00,+0.21,+0.07)m  dist=1.52m  conf=0.82  fragility=0.1  [ball]  ✗ unreachable
+ - bowl                 pos=(+0.10,-0.24,+0.12)m  dist=0.65m  conf=0.88  fragility=0.5  [container]  ✓ reachable
+ - cup                  pos=(+0.36,-0.17,+0.06)m  dist=0.88m  conf=0.95  fragility=0.6  [drinkware/container]  ✗ unreachable
+ - bottle               pos=(+0.50,+0.01,+0.15)m  dist=1.01m  conf=0.54  fragility=0.8  [drinkware/fragile]  ✗ unreachable
+ - cake                 pos=(+0.76,-0.41,+0.15)m  dist=1.33m  conf=0.94  fragility=0.9  [fragile/food]  ✗ unreachable
+ - sports ball          pos=(+1.00,+0.21,+0.07)m  dist=1.52m  conf=0.82  fragility=0.1  [ball]  ✗ unreachable
 
  - first N lines
  - Refer to the file /JSONpromptToLLM/ to see the complete prompt
 
 ---
+## Affordances as a result of Reasoning + Scene graph prompt
+
+{
+  "cup": -100,
+  "cake": -100,
+  "bowl": -450,
+  "bottle": -1000,
+  "sports ball": 200
+}
+---
+## Scene walkthrough on applying the affordances
+
+- Scene from Gazebo
+<img width="726" height="649" alt="6267F819-FFDF-4410-A442-822B7AC550C6" src="https://github.com/user-attachments/assets/6574280a-e5c5-45eb-a513-44bada37602e" />
+
+- Scene from RVIZ after collision objects + Voxels based on affordances
+<img width="726" height="497" alt="3BD23288-AF21-44A0-92E7-3AE681ED2388" src="https://github.com/user-attachments/assets/b0c3466c-bd06-4c76-aeb2-b8c513d96502" />
+
+<img width="740" height="550" alt="3F314B47-042A-43D4-A7E0-19E9AAA73E5F_1_102_o" src="https://github.com/user-attachments/assets/f095812e-3565-48ba-8ee5-7ff65a78d3e0" />
+
 
 ## Stack
 
