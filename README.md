@@ -126,8 +126,6 @@ You are the affordance reasoning module for a reactive robot manipulation system
 <img width="726" height="649" alt="6267F819-FFDF-4410-A442-822B7AC550C6" src="https://github.com/user-attachments/assets/6574280a-e5c5-45eb-a513-44bada37602e" />
 
 - Scene from RVIZ after collision objects + Voxels based on affordances
-<img width="740" height="550" alt="3F314B47-042A-43D4-A7E0-19E9AAA73E5F_1_102_o" src="https://github.com/user-attachments/assets/9ab0c583-9196-49cf-8e52-b56c3378d25a" />
-
 <img width="726" height="497" alt="3BD23288-AF21-44A0-92E7-3AE681ED2388" src="https://github.com/user-attachments/assets/b0c3466c-bd06-4c76-aeb2-b8c513d96502" />
 
 <img width="726" height="497" alt="E5427382-705D-4B51-A02C-30C1EE68B492" src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37" />
