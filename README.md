@@ -1,48 +1,81 @@
-# ARGUS — Part 1: The Scene Graph
+# ARGUS — Part 1: Scene Graph
 
-> Real-Time Open-Vocabulary Affordance Grounding for Reactive Manipulation
+> **Real-Time Open-Vocabulary Scene Understanding for Reactive Robot Manipulation**
 
-- Scene Graph with entity quantitative and qualitative relationships
-<img width="1250" height="629" alt="0D779110-37EC-4E36-8D21-60DDBC7E1F0B_1_105_c" src="https://github.com/user-attachments/assets/cdd3ee91-8c05-4625-b26f-809415929f89" />
-
--Auto generated comprehensive relationships between entities
-<img width="1458" height="1494" alt="BF7C202F-BFEA-410D-863D-D7BAD490B86B" src="https://github.com/user-attachments/assets/db2dd598-bce8-4f2a-a40c-210f85bade22" />
-
-- Top Down view of the scene automatically generated
-<img width="1230" height="638" alt="6B517934-8427-4419-8604-64128E7B6C58_1_105_c" src="https://github.com/user-attachments/assets/3045c3fc-0b9a-410f-9561-850731ac247e" />
----
-
-This is the first part of a series documenting ARGUS. Before the LLM reasons about what to do, it needs to know what's actually there — and where. That's what the scene graph does.
+This repository implements the perception layer of **ARGUS**. Starting from a live RGB-D stream, it constructs a rich 3D scene graph that is later used by an LLM for affordance reasoning.
 
 ---
 
-## What this part covers
+# Features
 
-Given a live RGBD stream, ARGUS:
+✅ Open-vocabulary object detection
 
-1. Runs **VLM** on the current frame — detects every object in the scene, not just the ones in the user's prompt
-2. Projects each detection into **3D world coordinates** using depth + TF
-3. Constructs a **scene graph** — every object becomes a node, every pair of objects gets a set of spatial relations as edges
-4. Renders a **live HTML visualizer** that opens in the browser the moment it runs
+✅ 3D world localization
 
-The scene graph is what gets handed to the LLM in Part 2. The richer the graph, the better the affordance reasoning.
+✅ Rich pairwise spatial relationships
+
+✅ Interactive HTML scene graph visualization
+
+✅ LLM-ready scene representation
 
 ---
 
-## Scene graph structure
+# Demo
 
-Each object node stores:
-- 3D world position `(x, y, z)`
-- VLM detection confidence
-- Fragility score (from a semantic knowledge base)
-- Reachability (within UR5e workspace limits)
-- Distance to robot base
-- Semantic categories (`fragile`, `drinkware`, `container`, ...)
+## Scene Graph
 
-Each edge between two objects stores the full set of spatial relations:
+<p align="center">
+<img src="https://github.com/user-attachments/assets/cdd3ee91-8c05-4625-b26f-809415929f89" width="900">
+</p>
 
-| Family | Relations |
-|---|---|
+---
+
+## Automatically Generated Relationships
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/db2dd598-bce8-4f2a-a40c-210f85bade22" width="900">
+</p>
+
+---
+
+## Top-Down Scene Visualization
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/3045c3fc-0b9a-410f-9561-850731ac247e" width="900">
+</p>
+
+---
+
+# Pipeline
+
+Given a live RGB-D stream, ARGUS:
+
+1. Detects **every visible object** using an open-vocabulary vision model.
+2. Projects detections into **3D world coordinates** using depth and TF.
+3. Builds a scene graph where
+   - every object is a node
+   - every pair of objects is connected through semantic spatial relations.
+4. Generates an interactive HTML visualizer.
+
+This graph becomes the input to the reasoning module in **Part 2**.
+
+---
+
+# Scene Graph
+
+Each node stores
+
+- World position `(x,y,z)`
+- Detection confidence
+- Fragility score
+- Reachability
+- Distance from robot
+- Semantic categories
+
+Each edge stores spatial relationships.
+
+| Category | Relations |
+|-----------|-----------|
 | Proximity | `near` · `close` · `moderate_distance` · `far_from` |
 | Lateral | `left_of` · `right_of` · `directly_left_of` · `directly_right_of` |
 | Depth | `in_front_of` · `behind` · `directly_ahead` · `directly_behind` |
@@ -53,65 +86,70 @@ Each edge between two objects stores the full set of spatial relations:
 
 ---
 
-## Visualizer
+# HTML Visualizer
 
-The HTML visualizer opens automatically after each run.
+The generated dashboard contains
+
+- Top-down spatial map
+- Interactive scene graph
+- Pairwise spatial relationship table
+- Object summary table
 
 ```
 ┌──────────────────────┬──────────────────────┐
-│  Top-Down Spatial    │  Detected Objects    │
-│  Map                 │                      │
+│ Top-Down Map         │ Object Summary       │
 ├──────────────────────┼──────────────────────┤
-│  Scene Graph         │  Spatial Relations   │
-│  (knowledge graph    │  (colour-coded       │
-│   style)             │   by relation type)  │
+│ Scene Graph          │ Spatial Relations    │
 └──────────────────────┴──────────────────────┘
-```![Uploading image.png…]()
-
-
-- **Top-down map** — objects plotted at real (x, y) positions, robot reach circle, path-to-goal arrow, goal highlighted
-- **Scene graph** — red nodes = objects, blue attribute nodes = conf / fragility / reachability / weight, arrows = spatial relations coloured by family
-- **Spatial relations table** — every pairwise relation with colour-coded badges per relation type
-- **Detected objects table** — confidence, fragility, reachability, distance, affordance weight
+```
 
 ---
 
-## Running
+# Running
 
 ```bash
-# Gazebo + MoveIt2 stack already running, image bridge active
+# Gazebo + MoveIt2 already running
 
 ros2 run argus_scene_graph orchestrator_node
 ```
 
-Browser opens automatically. No API key needed for this part — the scene graph runs entirely from perception.
+The browser opens automatically.
 
 ---
-## JSON as input given to a reasoning LLM:
-     
-You are the affordance reasoning module for a reactive robot manipulation system. Your job is to assign a numerical affordance weight to every object in the scene.
 
-- ══════════════════════════════
--    3D SCENE GRAPH          
-- ══════════════════════════════
+# Prompt Sent to the LLM
 
--Robot base: (-0.50, 0.00, 0.00)m  |  Max reach: 0.85m
--Camera:     (0.50, -1.40, 0.82)m
--Goal:       sports ball at (1.00, 0.21, 0.07)m
+The generated scene graph is serialized into a structured prompt.
 
-── OBJECTS (5 detected) ──
- - bowl                 pos=(+0.10,-0.24,+0.12)m  dist=0.65m  conf=0.88  fragility=0.5  [container]  ✓ reachable
- - cup                  pos=(+0.36,-0.17,+0.06)m  dist=0.88m  conf=0.95  fragility=0.6  [drinkware/container]  ✗ unreachable
- - bottle               pos=(+0.50,+0.01,+0.15)m  dist=1.01m  conf=0.54  fragility=0.8  [drinkware/fragile]  ✗ unreachable
- - cake                 pos=(+0.76,-0.41,+0.15)m  dist=1.33m  conf=0.94  fragility=0.9  [fragile/food]  ✗ unreachable
- - sports ball          pos=(+1.00,+0.21,+0.07)m  dist=1.52m  conf=0.82  fragility=0.1  [ball]  ✗ unreachable
+```text
+You are the affordance reasoning module for a reactive robot manipulation system.
 
- - first N lines
- - Refer to the file /JSONpromptToLLM/ to see the complete prompt
+═══════════════════════════════
+3D SCENE GRAPH
+═══════════════════════════════
+
+Robot base: (-0.50, 0.00, 0.00)
+Camera:     (0.50, -1.40, 0.82)
+Goal:       sports ball
+
+OBJECTS (5)
+
+• bowl
+• cup
+• bottle
+• cake
+• sports ball
+
+...
+```
+
+See `/JSONpromptToLLM/` for the complete prompt.
 
 ---
-## Affordances as a result of Reasoning + Scene graph prompt
 
+# Example LLM Output
+
+```json
 {
   "cup": -100,
   "cake": -100,
@@ -119,22 +157,44 @@ You are the affordance reasoning module for a reactive robot manipulation system
   "bottle": -1000,
   "sports ball": 200
 }
----
-## Scene walkthrough on applying the affordances
-
-- Scene from Gazebo
-<img width="726" height="649" alt="6267F819-FFDF-4410-A442-822B7AC550C6" src="https://github.com/user-attachments/assets/6574280a-e5c5-45eb-a513-44bada37602e" />
-
-- Scene from RVIZ after collision objects + Voxels based on affordances
-<img width="726" height="497" alt="3BD23288-AF21-44A0-92E7-3AE681ED2388" src="https://github.com/user-attachments/assets/b0c3466c-bd06-4c76-aeb2-b8c513d96502" />
-
-<img width="726" height="497" alt="E5427382-705D-4B51-A02C-30C1EE68B492" src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37" />
-
-
-## Stack
-
-`ROS2 Jazzy` · `Gazebo Harmonic` · `UR5e` · `YOLO v8l` · `Python 3.11` · `Pixi / RoboStack`
+```
 
 ---
 
-**Part 2 →** The LLM receives this graph and reasons about affordances across every object in the scene.
+# Applying the Affordances
+
+## Gazebo
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/6574280a-e5c5-45eb-a513-44bada37602e" width="700">
+</p>
+
+---
+
+## RViz
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/b0c3466c-bd06-4c76-aeb2-b8c513d96502" width="700">
+</p>
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37" width="700">
+</p>
+
+---
+
+# Technology Stack
+
+- ROS2 Jazzy
+- Gazebo Harmonic
+- UR5e
+- YOLOv8-L
+- Python 3.11
+- Pixi
+- RoboStack
+
+---
+
+## Next
+
+**Part 2** uses this scene graph to perform affordance reasoning with an LLM.
