@@ -8,16 +8,11 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 
 # Features
 
-✅ Open-vocabulary object detection
-
-✅ 3D world localization
-
-✅ Rich pairwise spatial relationships
-
-✅ Interactive HTML scene graph visualization
-
-✅ LLM-ready scene representation
-
+> Open-vocabulary object detection >
+> 3D world localization
+> Rich pairwise spatial relationships
+> Interactive HTML scene graph visualization
+> LLM-ready scene representation
 ---
 
 # Demo
