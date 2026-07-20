@@ -3,6 +3,7 @@
 > **Real-Time Open-Vocabulary Scene Understanding for Reactive Robot Manipulation**
 
 This repository implements the perception layer of **ARGUS**. Starting from a live RGB-D stream, it constructs a rich 3D scene graph that is later used by an LLM for affordance reasoning.
+
 ---
 
 # Demo
