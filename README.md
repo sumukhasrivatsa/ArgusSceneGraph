@@ -91,9 +91,9 @@ Browser opens automatically. No API key needed for this part — the scene graph
      
 You are the affordance reasoning module for a reactive robot manipulation system. Your job is to assign a numerical affordance weight to every object in the scene.
 
-╔══════════════════════════════╗
-║     3D SCENE GRAPH           ║
-╚══════════════════════════════╝
+- ══════════════════════════════
+-    3D SCENE GRAPH          
+- ══════════════════════════════
 
 -Robot base: (-0.50, 0.00, 0.00)m  |  Max reach: 0.85m
 -Camera:     (0.50, -1.40, 0.82)m
