@@ -138,19 +138,19 @@ See `/JSONpromptToLLM/` for the complete prompt.
 ```json
 {
   "bottle": -950,
-  "cake": -900,
-  "cup": -150,
-  "bowl": -300,
+  "cake": -600,
+  "cup": -300,
+  "bowl": -200,
   "sports ball": 200
 }
 ```
 These values reflect relative importance rather than snapping to the predefined levels:
 
-* Bottle (-950): Explicitly mentioned by the user (“be careful”), fragile (0.8), close to the cup, and lies on the path toward the goal (target_on_path_to_goal), making it the highest-risk obstacle.
-* Cake (-900): Also explicitly mentioned, extremely fragile (0.9), and on the approach to the goal, but slightly farther from the direct interaction than the bottle.
-* Bowl (-300): Not mentioned, but reachable and located earlier in the workspace. While not highly fragile, accidental contact is plausible, so it receives a moderate penalty.
-* Cup (-150): Not part of the task, not particularly hazardous, and merely near the bottle. It should be avoided if convenient but is not a significant obstacle.
-* Sports ball (+200): Fixed goal object as specified by the prompt.
+* Bottle (-950): Explicitly mentioned by the user (“be careful of the bottle”), fragile (0.8), and lies on the path to the goal, making it the highest-priority obstacle to avoid.
+* Cake (-600): Explicitly mentioned and highly fragile (0.9), but it is not directly on the manipulation path, so it receives a strong but lower penalty than the bottle.
+* Cup (-300): Moderately fragile (0.6) and close to the path toward the goal, making accidental contact possible. It should be avoided, but it is not as critical as the user-specified fragile objects.
+* Bowl (-200): Somewhat fragile (0.5) but off the primary path to the goal, so it warrants only a mild avoidance penalty.
+* Sports ball (+200): The designated goal object, so it retains its assigned positive weight.
 ---
 
 # Applying the Affordances
