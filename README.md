@@ -164,15 +164,6 @@ These values reflect relative importance rather than snapping to the predefined 
 ---
 
 ## RViz
-
-<p align="center">
-<img src="https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37](https://github.com/user-attachments/assets/ba07fd17-219b-44d9-b811-9b16761d0360" width="700">
-</p>
-
-<p align="center">
-<img src="[https://github.com/user-attachments/assets/eb792b3f-e2c5-4307-854e-4b23bf04da37](https://github.com/user-attachments/assets/deda72e3-036b-4298-b043-d7ed2be3f628" width="700">
-</p>
-
 <p align="center">
 <img src="https://github.com/user-attachments/assets/46e4c08a-00fa-4d0b-bc5a-4b9f2c6186ab" width="700">
 </p>
