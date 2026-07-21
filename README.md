@@ -137,14 +137,20 @@ See `/JSONpromptToLLM/` for the complete prompt.
 
 ```json
 {
-  "cup": -100,
-  "cake": -100,
-  "bowl": -450,
-  "bottle": -1000,
+  "bottle": -950,
+  "cake": -900,
+  "cup": -150,
+  "bowl": -300,
   "sports ball": 200
 }
 ```
+These values reflect relative importance rather than snapping to the predefined levels:
 
+* Bottle (-950): Explicitly mentioned by the user (“be careful”), fragile (0.8), close to the cup, and lies on the path toward the goal (target_on_path_to_goal), making it the highest-risk obstacle.
+* Cake (-900): Also explicitly mentioned, extremely fragile (0.9), and on the approach to the goal, but slightly farther from the direct interaction than the bottle.
+* Bowl (-300): Not mentioned, but reachable and located earlier in the workspace. While not highly fragile, accidental contact is plausible, so it receives a moderate penalty.
+* Cup (-150): Not part of the task, not particularly hazardous, and merely near the bottle. It should be avoided if convenient but is not a significant obstacle.
+* Sports ball (+200): Fixed goal object as specified by the prompt.
 ---
 
 # Applying the Affordances
