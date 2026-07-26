@@ -165,7 +165,7 @@ These values reflect relative importance rather than snapping to the predefined 
 ## RViz
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/bdab2299-422b-4255-82da-5735524688d2" width="500">
+<img src="https://github.com/user-attachments/assets/bdab2299-422b-4255-82da-5735524688d2" width="700">
 </p>
 
 <p align="center">
