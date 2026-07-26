@@ -14,15 +14,23 @@ What it does:
   4. Infers goal object from the prompt (simple keyword match)
   5. Builds a SceneGraph from all detections
   6. Generates scene_graph.html → opens in browser automatically
-  7. (Optional) Calls LLM for affordance weights → publishes to /argus/weights
+  7. Gets affordance weights, in priority order:
+       a. /tmp/argus_manual_weights.json, if present  (hand-crafted / pasted
+          from an LLM you ran yourself — no API key needed)
+       b. Live LLM call, if ANTHROPIC_API_KEY is set
+       c. Geometric fallback (SceneGraph.suggest_default_weights())
+     Either way, the full LLM prompt (built via scene_graph.py's
+     LLMPromptBuilder) is ALWAYS written to /tmp/argus_llm_prompt.txt so you
+     can paste it into any LLM by hand and use the result via (a).
 
 For the LinkedIn demo, steps 1-6 are what matter.
-Step 7 is bonus — works if ANTHROPIC_API_KEY is set.
+Step 7 is bonus — works with or without ANTHROPIC_API_KEY.
 """
 
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 
@@ -50,6 +58,10 @@ IMAGE_HEIGHT_PX    = 480
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL   = "claude-sonnet-4-6"
+
+LLM_PROMPT_PATH    = '/tmp/argus_llm_prompt.txt'
+MANUAL_WEIGHTS_PATH = '/tmp/argus_manual_weights.json'
+WEIGHTS_JSON_PATH   = '/tmp/argus_weights.json'
 
 # ── simple keyword → label mapping for goal inference ─────────────────────────
 # "move the cup to the ball" → goal = "cup"
@@ -80,6 +92,35 @@ def infer_goal_from_prompt(prompt: str) -> str | None:
     return None
 
 
+# Matches GOAL=[whatever is in here], case-insensitive on the "GOAL=" part.
+# e.g. "avoid the vase GOAL=[cup]" -> "cup"
+#      "GOAL=[red ball], be careful"      -> "red ball" -> resolved via
+#      GOAL_KEYWORDS to "sports ball" below, same as the old keyword-inference
+#      path did, so existing aliases keep working.
+GOAL_PATTERN = re.compile(r"GOAL\s*=\s*\[([^\]]*)\]", re.IGNORECASE)
+
+
+def parse_goal_from_prompt(prompt: str) -> str | None:
+    """
+    Explicit goal override: everything between the '[' and ']' after
+    'GOAL=' in the prompt is taken as the goal label, e.g.
+        "pick this up carefully GOAL=[bottle]" -> "bottle"
+    This takes priority over infer_goal_from_prompt's keyword matching,
+    since it's an explicit instruction rather than a guess. Falls through
+    GOAL_KEYWORDS so aliases (e.g. "red ball", "mug") still resolve to the
+    label the detector actually uses.
+    Returns None if no GOAL=[...] is present, or if it's present but empty
+    (e.g. "GOAL=[]"), so callers can fall back cleanly.
+    """
+    match = GOAL_PATTERN.search(prompt)
+    if not match:
+        return None
+    raw = match.group(1).strip().lower()
+    if not raw:
+        return None
+    return GOAL_KEYWORDS.get(raw, raw)
+
+
 class OrchestratorNode(Node):
 
     def __init__(self, prompt: str):
@@ -88,8 +129,21 @@ class OrchestratorNode(Node):
         self.prompt    = prompt
         self.rgb_image = None
         self.depth_image = None
-        self.done      = False
         self.bridge    = CvBridge()
+
+        # Change-detection state — kept across ticks so we skip the
+        # expensive rebuild (YOLO -> scene graph -> LLM/manual-weights ->
+        # JSON write -> republish) on ticks where nothing actually changed.
+        # Previously the pipeline was one-shot (self.done = True after the
+        # first frame ever), so a suitcase that appeared later would never
+        # end up in /tmp/argus_weights.json. Now: re-run each tick, but only
+        # rebuild when the SET of detected labels changes OR an existing
+        # object has moved more than POS_CHANGE_THRESHOLD_M. Weights are
+        # cached per label-set signature so a static scene doesn't re-hit
+        # the LLM or overwrite the manual weights file on every tick.
+        self._prev_label_set: set[str] = set()
+        self._prev_positions: dict[str, tuple] = {}
+        self._weights_cache: dict[frozenset, dict] = {}
 
         self.get_logger().info(f'Prompt: "{self.prompt}"')
 
@@ -119,7 +173,12 @@ class OrchestratorNode(Node):
         # weights publisher (for VisualBlock if running)
         self.weights_pub = self.create_publisher(String, '/argus/weights', 10)
 
-        self.create_timer(0.5, self._try_run)
+        # Slower than the old 0.5s: YOLO + scene-graph + potential LLM call
+        # is not a hot loop, and the change-detection gate below means most
+        # ticks will short-circuit anyway. 2s is fast enough to notice a
+        # new object showing up (like the suitcase) without pointlessly
+        # re-running YOLO 20x for the same frame.
+        self.create_timer(2.0, self._try_run)
         self.get_logger().info('Waiting for RGBD frame...')
 
     # ── callbacks ─────────────────────────────────────────────────────────────
@@ -134,22 +193,59 @@ class OrchestratorNode(Node):
     # ── main pipeline ─────────────────────────────────────────────────────────
 
     def _try_run(self):
-        if self.done:
-            return
+        # No more one-shot latch: this tick runs every 2s (see the timer in
+        # __init__), and the change-detection gate below decides whether to
+        # do the expensive downstream work or bail early.
         if self.rgb_image is None or self.depth_image is None:
             return
 
-        self.done = True
-        self.get_logger().info('Frame received. Running pipeline...')
-
-        # save raw frame
+        # save raw frame — cheap, do it every tick so the last snapshot on
+        # disk always matches whatever the node most-recently looked at
         cv2.imwrite('/tmp/argus_frame.png', self.rgb_image)
 
         # ── step 1: YOLO ──────────────────────────────────────────────────────
         detections_raw = self._run_yolo()
 
-        KNOWN_LABELS = {"cup", "bottle", "cake", "bowl", "sports ball"}
+        # NOTE: suitcase was previously missing from this set, which is the
+        # actual reason it never showed up in /tmp/argus_weights.json — YOLO
+        # was detecting it fine (see /tmp/argus_detections.png), but this
+        # filter dropped it before it ever reached the scene graph.
+        KNOWN_LABELS = {"cup", "bottle", "cake", "bowl", "sports ball", "suitcase", "toaster"}
         detections_raw = [d for d in detections_raw if d["label"] in KNOWN_LABELS]
+
+        # ── change-detection gate ─────────────────────────────────────────────
+        # Bail early if nothing meaningful changed since the last tick, so
+        # we don't rebuild the scene graph / re-query the LLM / rewrite the
+        # JSON on every tick for a static scene.
+        current_labels = frozenset(d["label"] for d in detections_raw)
+        labels_changed = current_labels != frozenset(self._prev_label_set)
+
+        POS_CHANGE_THRESHOLD_M = 0.03   # 3cm — same order as VisualBlock's
+        pos_changed = False
+        # NOTE: we don't have projected 3D positions yet at this point (that
+        # happens in step 2 below), so this per-object move check uses the
+        # 2D pixel centroid as a cheap proxy — if pixel centres moved, the
+        # 3D positions will too. Real move detection could be layered in
+        # after _project_to_3d if we care about sub-pixel-but-large-3D moves.
+        curr_pix = {d["label"]: (d["cx_px"], d["cy_px"]) for d in detections_raw}
+        for lb, (cx, cy) in curr_pix.items():
+            if lb in self._prev_positions:
+                px, py = self._prev_positions[lb]
+                if ((cx - px) ** 2 + (cy - py) ** 2) ** 0.5 > 20:  # ~20px
+                    pos_changed = True
+                    break
+
+        if not labels_changed and not pos_changed and self._prev_label_set:
+            self.get_logger().info(
+                f'No change ({sorted(current_labels)}) — skipping rebuild.',
+                throttle_duration_sec=10.0)
+            return
+
+        self.get_logger().info(
+            f'Scene changed (labels_changed={labels_changed}, '
+            f'pos_changed={pos_changed}) — running pipeline...')
+        self._prev_label_set = set(current_labels)
+        self._prev_positions = curr_pix
 
         if not detections_raw:
             self.get_logger().error('No detections. Check /tmp/argus_frame.png')
@@ -163,11 +259,26 @@ class OrchestratorNode(Node):
         self.get_logger().info(
             f'3D positions: {[(d["label"], d["pos"]) for d in detections_3d]}')
 
-        # ── step 3: goal is hardcoded — sports ball is always the target ────
-        goal_label = "sports ball"
-        self.get_logger().info(f'Goal: {goal_label}')
+        # ── step 3: goal comes from the prompt, not a hardcoded constant ────
+        # Priority: explicit "GOAL=[label]" in the prompt > keyword inference
+        # (infer_goal_from_prompt) > "sports ball" as a last-resort default so
+        # the demo never crashes on a prompt with no goal info at all.
+        detected_labels = {d["label"] for d in detections_3d}
+        goal_label = (
+            parse_goal_from_prompt(self.prompt)
+            or infer_goal_from_prompt(self.prompt)
+            or "sports ball"
+        )
+        if goal_label not in detected_labels:
+            self.get_logger().warn(
+                f'Goal "{goal_label}" not among detected objects '
+                f'{sorted(detected_labels)} — falling back to keyword '
+                f'inference / default instead.')
+            goal_label = infer_goal_from_prompt(self.prompt) or "sports ball"
+        self.get_logger().info(f'Goal: {goal_label} (from prompt: "{self.prompt}")')
 
         # ── step 4: build SceneGraph ──────────────────────────────────────────
+        graph, diff = None, None
         try:
             from argus_scene_graph.scene_graph import SceneGraphBuilder, Detection as SGDetection
             from argus_scene_graph.SceneGraphHTML import generate_html
@@ -202,19 +313,84 @@ class OrchestratorNode(Node):
         except ImportError as e:
             self.get_logger().warn(f'scene_graph.py not found: {e}')
 
-        # ── step 6: (optional) call LLM + publish weights ─────────────────────
-        if ANTHROPIC_API_KEY:
+        if graph is None:
+            self.get_logger().error('No scene graph — cannot compute weights.')
+            return
+
+        # ── step 6: build + save the real LLM prompt, ALWAYS ────────────────
+        # Previously this only ever ran (and only ever existed as a duplicate,
+        # inferior copy) inside the API-key branch below, so if you didn't
+        # have a key set, no prompt file was ever written. Now it's built via
+        # scene_graph.py's own LLMPromptBuilder (the in-depth one, with scene
+        # relations / fragility / path-obstacle reasoning per object) and
+        # saved unconditionally, so you can always paste it into an LLM
+        # yourself even with zero API usage.
+        prompt_text = None
+        try:
+            from argus_scene_graph.scene_graph import LLMPromptBuilder
+            prompt_text = LLMPromptBuilder.build_affordance_prompt(
+                graph,
+                user_instruction=self.prompt,
+                known_weights={goal_label: 200},
+                diff=diff,
+            )
+            with open(LLM_PROMPT_PATH, 'w') as f:
+                f.write(prompt_text)
+            self.get_logger().info(f'LLM prompt → {LLM_PROMPT_PATH}')
+        except Exception as e:
+            self.get_logger().error(f'Prompt build/save failed: {e}')
+
+        # ── step 7: get weights — manual override > live LLM > geometric ────
+        weights = None
+
+        # (a) manual override: paste an LLM's response (or your own numbers)
+        # into /tmp/argus_manual_weights.json and it's used as-is, no API
+        # call needed. Any object missing from that file gets the geometric
+        # suggestion instead of being silently dropped.
+        manual_weights = self._load_manual_weights(graph)
+        if manual_weights is not None:
+            weights = manual_weights
+            self.get_logger().info(f'Using manual weights: {weights}')
+
+        # (b) live LLM call, only if no manual override and a key is present
+        if weights is None and ANTHROPIC_API_KEY and prompt_text:
             self.get_logger().info('API key found — calling LLM...')
-            weights = self._call_llm(detections_3d, goal_label)
+            weights = self._call_llm(prompt_text)
             if weights:
-                msg      = String()
-                msg.data = json.dumps(weights)
-                self.weights_pub.publish(msg)
-                self.get_logger().info(f'Weights published: {weights}')
-        else:
-            self.get_logger().info(
-                'No ANTHROPIC_API_KEY set — skipping LLM. '
-                'Set it to also trigger robot movement.')
+                self.get_logger().info(f'LLM weights: {weights}')
+            else:
+                self.get_logger().warn('LLM failed — falling back to geometric weights')
+
+        # (c) geometric fallback — last resort
+        if weights is None:
+            weights = graph.suggest_default_weights()
+            weights[goal_label] = 200
+            self.get_logger().info(f'Using geometric fallback weights: {weights}')
+
+        # ── step 8: save + publish weights to all subscribers ─────────────────
+        positions  = {lb: list(node.pos)  for lb, node in graph.nodes.items()}
+        # Per-object size (w, h, d) in metres, straight off SceneNode.size —
+        # perception_node/SceneGraphBuilder already populated this from the
+        # YOLO bbox + depth back-projection, so no new perception. Added
+        # here so voxel_publisher can render each object filling its actual
+        # detected extent instead of a fixed-sigma point-Gaussian at the
+        # centroid (a suitcase filling its bbox instead of a 9cm halo).
+        sizes      = {lb: list(node.size) for lb, node in graph.nodes.items()}
+        voxel_data = {"weights": weights, "positions": positions, "sizes": sizes}
+
+        # save for voxel_publisher to read
+        with open(WEIGHTS_JSON_PATH, 'w') as f:
+            json.dump(voxel_data, f, indent=2)
+        self.get_logger().info(
+            f'Weights + positions + sizes → {WEIGHTS_JSON_PATH}')
+
+        # publish to /argus/weights
+        # → VisualBlock starts publishing collision objects + goal
+        # → VoxelPublisher triggers voxel map
+        msg      = String()
+        msg.data = json.dumps(weights)
+        self.weights_pub.publish(msg)
+        self.get_logger().info(f'Published to /argus/weights → VisualBlock + VoxelPublisher')
 
     # ── YOLO ──────────────────────────────────────────────────────────────────
 
@@ -286,25 +462,56 @@ class OrchestratorNode(Node):
 
     # ── LLM ───────────────────────────────────────────────────────────────────
 
-    def _call_llm(self, detections_3d, goal_label) -> dict | None:
+    def _load_manual_weights(self, graph) -> dict | None:
+        """
+        Manual override so you can drive the whole pipeline without an API
+        key: run the node once, it saves /tmp/argus_llm_prompt.txt, paste
+        that into any LLM (or reason about it yourself), save the JSON it
+        gives you to /tmp/argus_manual_weights.json, and every subsequent
+        run picks it up here instead of hitting the API or the geometric
+        fallback.
+
+        The prompt itself asks for a weight for EVERY object in the scene
+        (see LLMPromptBuilder's "OUTPUT FORMAT" section), so a correctly
+        pasted response should already cover every label — geometric
+        fallback here was previously silent, so a typo/missing key in your
+        pasted JSON would quietly get overwritten with a geometric guess
+        and you'd have no way to tell your manual weights weren't actually
+        the ones driving the voxel field. Now: any label missing from the
+        manual file is loudly warned about (so you notice and fix the
+        JSON), and only THEN does it fall back to the geometric suggestion
+        rather than leaving that object unweighted entirely.
+        """
+        if not os.path.exists(MANUAL_WEIGHTS_PATH):
+            return None
+        try:
+            with open(MANUAL_WEIGHTS_PATH, 'r') as f:
+                manual = json.load(f)
+        except Exception as e:
+            self.get_logger().error(f'Could not parse {MANUAL_WEIGHTS_PATH}: {e}')
+            return None
+
+        missing = [lb for lb in graph.nodes if lb not in manual]
+        if missing:
+            self.get_logger().warn(
+                f'{MANUAL_WEIGHTS_PATH} is missing weights for {missing} — '
+                f'these will use the geometric fallback instead of your '
+                f'pasted values. Add them explicitly if that\'s not what '
+                f'you want.')
+
+        suggested = graph.suggest_default_weights() if missing else {}
+        return {lb: manual.get(lb, suggested.get(lb, -200)) for lb in graph.nodes}
+
+    def _call_llm(self, prompt_text: str) -> dict | None:
+        """
+        Calls the live API with the prompt already built (and saved) in
+        step 6 — this used to rebuild its own separate, worse prompt and
+        was also being called with a mismatched number of arguments
+        (`_call_llm(graph, diff, goal_label)` against a 2-arg signature),
+        which would have raised a TypeError the moment ANTHROPIC_API_KEY was
+        ever set. Fixed: single prompt_text argument, matches the call site.
+        """
         import requests
-
-        all_labels = [d["label"] for d in detections_3d]
-        prompt = f"""You are a robot manipulation planner.
-
-User instruction: "{self.prompt}"
-Goal object (inferred): {goal_label}
-
-Detected objects: {all_labels}
-
-Assign an affordance weight to every object:
-  positive (+200)   → GOAL (robot picks this up)
-  -100 to -599      → SOFT obstacle (can be relaxed if stuck)
-  -600 to -1000     → HARD obstacle (never touch)
-
-Consider: fragility, proximity to goal, whether it blocks the path.
-Return ONLY valid JSON, no explanation:
-{{"label": weight, ...}}"""
 
         try:
             resp = requests.post(
@@ -316,8 +523,8 @@ Return ONLY valid JSON, no explanation:
                 },
                 json={
                     "model":      ANTHROPIC_MODEL,
-                    "max_tokens": 256,
-                    "messages":   [{"role": "user", "content": prompt}],
+                    "max_tokens": 512,
+                    "messages":   [{"role": "user", "content": prompt_text}],
                 },
                 timeout=30,
             )
