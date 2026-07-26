@@ -164,7 +164,9 @@ These values reflect relative importance rather than snapping to the predefined 
 
 ## RViz
 
-<img width="1472" height="1852" alt="B348B7BD-1144-4A7F-A936-4A3851337072" src="https://github.com/user-attachments/assets/bdab2299-422b-4255-82da-5735524688d2" />
+<p align="center">
+<img src="https://github.com/user-attachments/assets/bdab2299-422b-4255-82da-5735524688d2" width="700">
+</p>
 
 <p align="center">
 <img src="https://github.com/user-attachments/assets/8d0a4704-f8e9-404d-98ef-fda97362f29a" width="700">
