@@ -157,7 +157,7 @@ These values reflect relative importance rather than snapping to the predefined 
 ## Gazebo
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/65ffd5d1-7419-4047-bac8-8a48989c536e" width="700">
+<img src="https://github.com/user-attachments/assets/e54dabb1-a894-40db-889d-b8931d88d89c" width="700">
 </p>
 
 ---
