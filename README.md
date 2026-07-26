@@ -11,11 +11,19 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 ## Scene Graph
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/cdd3ee91-8c05-4625-b26f-809415929f89" width="900">
+<img src="https://github.com/user-attachments/assets/62d32d7f-93dc-4e18-b3a8-35802492ed86" width="900">
 </p>
+
 
 ---
 
+## Top-Down Scene Visualization
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/e221bd7a-94b3-49d4-a338-97d091d33148" width="900">
+</p>
+
+---
 ## Automatically Generated Relationships
 
 <p align="center">
@@ -23,15 +31,6 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 </p>
 
 ---
-
-## Top-Down Scene Visualization
-
-<p align="center">
-<img src="https://github.com/user-attachments/assets/3045c3fc-0b9a-410f-9561-850731ac247e" width="900">
-</p>
-
----
-
 # Pipeline
 
 Given a live RGB-D stream, ARGUS:
