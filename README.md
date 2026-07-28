@@ -4,6 +4,8 @@
 
 This repository implements the perception layer of **ARGUS**. Starting from a live RGB-D stream, it constructs a rich 3D scene graph that is later used by an LLM for affordance reasoning.
 
+Here is the demo:
+<iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7487149331599245313?compact=1" height="399" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
 ---
 
 # Demo
