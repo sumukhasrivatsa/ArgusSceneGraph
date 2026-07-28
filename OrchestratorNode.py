@@ -210,7 +210,7 @@ class OrchestratorNode(Node):
         # actual reason it never showed up in /tmp/argus_weights.json — YOLO
         # was detecting it fine (see /tmp/argus_detections.png), but this
         # filter dropped it before it ever reached the scene graph.
-        KNOWN_LABELS = {"cup", "bottle", "cake", "bowl", "sports ball", "suitcase", "toaster"}
+        KNOWN_LABELS = {"cup", "bottle", "cake", "bowl", "sports ball", "suitcase", "handbag", "vase"}
         detections_raw = [d for d in detections_raw if d["label"] in KNOWN_LABELS]
 
         # ── change-detection gate ─────────────────────────────────────────────
