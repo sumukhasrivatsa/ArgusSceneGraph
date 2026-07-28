@@ -4,7 +4,6 @@
 
 This repository implements the perception layer of **ARGUS**. Starting from a live RGB-D stream, it constructs a rich 3D scene graph that is later used by an LLM for affordance reasoning.
 
-Here is the demo:
 <img width="800" height="450" alt="ARGUSFINALDEMOEdit-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/bc1ad10f-b2ea-4d85-98b0-ec6a10ded28e" />
 
 ---
@@ -168,19 +167,19 @@ These values reflect relative importance rather than snapping to the predefined 
 ## RViz
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/bdab2299-422b-4255-82da-5735524688d2" width="700">
+<img src="https://github.com/user-attachments/assets/bdab2299-422b-4255-82da-5735524688d2" width="500">
 </p>
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/8d0a4704-f8e9-404d-98ef-fda97362f29a" width="700">
+<img src="https://github.com/user-attachments/assets/8d0a4704-f8e9-404d-98ef-fda97362f29a" width="500">
 </p>
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/974ae969-3680-4098-90f3-8bbf3e601805" width="700">
+<img src="https://github.com/user-attachments/assets/974ae969-3680-4098-90f3-8bbf3e601805" width="500">
 </p>
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/46e4c08a-00fa-4d0b-bc5a-4b9f2c6186ab" width="700">
+<img src="https://github.com/user-attachments/assets/46e4c08a-00fa-4d0b-bc5a-4b9f2c6186ab" width="500">
 </p>
 
 ---
