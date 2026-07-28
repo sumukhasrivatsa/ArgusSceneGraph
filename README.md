@@ -27,7 +27,7 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 ## Automatically Generated Relationships
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/db2dd598-bce8-4f2a-a40c-210f85bade22" width="900">
+<img src="https://github.com/user-attachments/assets/67c83324-ff77-4cf6-bce2-09011c2be92f" width="900">
 </p>
 
 ---
