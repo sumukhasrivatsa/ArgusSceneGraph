@@ -10,7 +10,11 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 
 ---
 
-# Demo
+## Architecture
+
+<p align="center">
+<img width="2920" height="1240" alt="image" src="https://github.com/user-attachments/assets/b84daeb2-82c4-4219-bc9a-79b49ff96baa" />
+</p>
 
 ## Scene Graph
 
