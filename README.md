@@ -12,12 +12,12 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 
 Here are the user inputs:
 
--Go to the cake, avoid the ball and bowl.
--Go to the ball, avoid the suitcase, bowl & cup.
--Go to the suitcase, avoid the bottle & cup.
--Go to the ball, see if you need to be careful of anything else.
--Go to the suitcase, see if you need to be careful of anything else.
--Go to the suitcase, see if you need to be careful of anything else.
+- Go to the cake, avoid the ball and bowl.
+- Go to the ball, avoid the suitcase, bowl & cup.
+- Go to the suitcase, avoid the bottle & cup.
+- Go to the ball, see if you need to be careful of anything else.
+- Go to the suitcase, see if you need to be careful of anything else.
+- Go to the suitcase, see if you need to be careful of anything else.
 
 #
 
