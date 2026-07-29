@@ -8,7 +8,6 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 <img width="800" height="450" alt="ARGUSFINALDEMOEdit-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/bc1ad10f-b2ea-4d85-98b0-ec6a10ded28e" />
 </p>
 
-# Here are the user inputs:
 
 Here are the user inputs:
 
