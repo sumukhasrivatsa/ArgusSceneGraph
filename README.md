@@ -8,6 +8,14 @@ This repository implements the perception layer of **ARGUS**. Starting from a li
 <img width="800" height="450" alt="ARGUSFINALDEMOEdit-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/bc1ad10f-b2ea-4d85-98b0-ec6a10ded28e" />
 </p>
 
+Here are the user inputs:
+
+1.⁠ ⁠Go to the cake, avoid the ball and bowl
+2.⁠ ⁠Go to the ball, avoid the suitcase, bowl & cup
+3.⁠ ⁠Go to the suitcase, avoid the bottle & cup
+4.⁠ ⁠Go to the ball, see if you need to be careful of anything else
+5.⁠ ⁠Go to the suitcase, see if you need to be careful of anything else
+6.⁠ ⁠Go to the suitcase, see if you need to be careful of anything else
 ---
 
 ## Architecture
